@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homework Planner</title>
+  <style>
+ body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      margin: 0;
+      padding: 20px;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: white;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+      margin-bottom: 20px;
+    }
+
+    .form-container, .search-container, .sort-container, .filter-container {
+      background: white;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      width: 92%;
+      transition: transform 0.2s ease;
+    }
+    .form-container:hover, .search-container:hover, .sort-container:hover, .filter-container:hover {
+      transform: scale(1.02);
+    }
+
+     a {
+     text-decoration: none;
+     }
+     
+
+
+    .form-container input, 
+    .form-container button,
+    .search-container input,
+    .sort-container select {
+      margin: 8px 0;
+      padding: 10px;
+      width: 95%;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+ 
+    .form-container input:focus,
+    .search-container input:focus,
+    .sort-container select:focus {
+      border-color: #2575fc;
+      outline: none;
+      box-shadow: 0 0 5px rgba(37,117,252,0.6);
+    }
+    .form-container button {
+      background: linear-gradient(45deg, #6a11cb, #2575fc);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .form-container button:hover {
+      background: linear-gradient(45deg, #2575fc, #6a11cb);
+      transform: translateY(-2px);
+    }
+
+  #user-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 15px;
+    /*  max-width: 1000px;*/
+      width: 100%;
+    }
+    /* animations */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeOutShrink {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(0.8); }
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin:10px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      opacity: 0;
+      animation: fadeSlideUp 0.6s ease forwards;
+    }
+    .card.removing { animation: fadeOutShrink 0.4s ease forwards; }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+    }
+    .card h3 { margin: 0 0 10px 0; font-size: 18px; color: #2575fc; }
+    .card p { margin: 5px 0; color: #555; }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .card button {
+      flex: 1;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      font-size: 13px;
+      transition: background 0.3s ease;
+    }
+    .remove-btn { background: #dc3545; }
+    .remove-btn:hover { background: #a71d2a; }
+    .edit-btn { background: #ff9800;  }
+    .edit-btn:hover { background: #e68900; }
+   
+
+    .action-buttons { margin-top: 25px; }
+    .action-buttons button {
+      padding: 12px 18px;
+      margin: 0 8px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      color: white;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .action-buttons button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+    .remove-all-btn { background: linear-gradient(45deg, #ff416c, #ff4b2b); }
+    .restore-all-btn { background: linear-gradient(45deg, #11998e, #38ef7d); }
+    .today-btn { background: linear-gradient(45deg, #00c6ff, #0072ff); }
+    .today-btn:hover { background: linear-gradient(45deg, #0072ff, #00c6ff); }
+    
+  </style>
+</head>
+<body>
+  <h1>📅 Work Planner</h1>
+  <div class="search-container">
+  <input type="text" id="search" placeholder="Search..." onkeyup="searchUsers()">
+  </div>
+
+  <!-- Sort -->
+  <div class="sort-container">
+    <select id="sort" onchange="sortUsers()">
+      <option value="">🔽 Sort by</option>
+      <option value="date-asc">📅 Date (Ascending)</option>
+      <option value="date-desc">📅 Date (Descending)</option>
+      <option value="time-asc">⏰ Time (Ascending)</option>
+      <option value="time-desc">⏰ Time (Descending)</option>
+    </select>
+  </div>
+
+  <!-- Today Filter -->
+  <div class="filter-container">
+    <button class="today-btn" onclick="filterToday()">📌 Show Today’s Tasks</button>
+    <button class="restore-all-btn" onclick="renderUsers()">🔄 Show All Tasks</button>
+  </div>
+
+  <!-- Form -->
+  <div class="form-container" id="formEdit">
+    <input type="date" id="date" required>
+    <input type="time" id="time" required>
+    <input type="text" id="work" placeholder="Enter work/task" required>
+    <button onclick="addOrUpdateUser()">➕ Add Work</button>
+  </div>
+
+  <!-- Cards -->
+  <div id="user-container"></div>
+
+  <!-- Actions -->
+  <div class="action-buttons">
+    <button id="remove-all" class="remove-all-btn" onclick="removeAllUsers()">🗑 Remove All</button>
+    <button id="restore-all" class="restore-all-btn" onclick="restoreAllUsers()">♻️ Restore All</button>
+  </div>
+
+  <script>
+    const initialUsers = [
+      { id: 1, date: "23 March 2026", time: "09:00 AM", work: "Morning Meeting" },
+      { id: 2, date: "07 March 2026", time: "04:00 PM", work: "Project Work" },
+    ];
+
+    let users = loadUsers();
+    let nextId = users.length ? Math.max(...users.map(u => u.id)) + 1 : 4;
+    let editId = null;
+
+    function saveUsers() {
+      localStorage.setItem("users", JSON.stringify(users));
+    }
+    function loadUsers() {
+      return JSON.parse(localStorage.getItem("users")) || [...initialUsers];
+    }
+
+    function createUserCard(user, index) {
+      return `
+        <div class="card" style="animation-delay:${index * 0.1}s" id="user-${user.id}">
+          <h3>📅 ${user.date}  ⏰ ${user.time}</h3>
+          <p>📝 ${user.work}</p>
+          <div class="btn-group">
+            <button  class="edit-btn" onclick="editUser(${user.id})"><a href="#formEdit">✏ Edit</a></button>
+            <button class="remove-btn" onclick="removeUser(${user.id})">✖ Delete</button>
+          </div>
+        </div>
+      `;
+    }
+    
+    function renderUsers(filtered = null) {
+      const container = document.getElementById("user-container");
+      const list = filtered || users;
+      container.innerHTML = list.map((user, i) => createUserCard(user, i)).join("");
+      document.getElementById("remove-all").style.display = users.length > 0 ? "inline-block" : "none";
+      saveUsers();
+    }
+
+    function addOrUpdateUser() {
+      const dateValue = document.getElementById("date").value;
+      const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+      console.log(dateValue.split("-"));
+      const [year, month, day]= dateValue.split("-");
+      const date=`${day} ${monthNames[Number(month-1)]} ${year}`;
+     // const date=`${day} ${month} ${year}`;
+      console.log(month);
+      
+      const timeValue = document.getElementById("time").value;
+      let [hours, minutes]= timeValue.split(":");
+      hours= parseInt(hours);
+      const ampm= hours>=12?"PM":"AM";
+      hours=hours%12||12;
+      const time=`${hours}:${minutes} ${ampm}`;
+      
+      const work = document.getElementById("work").value.trim();
+
+      if (date && time && work) {
+        if (editId) {
+          const user = users.find(u => u.id === editId);
+          if (user) { user.date = date; user.time = time; user.work = work; }
+          editId = null;
+          document.querySelector(".form-container button").innerText = "➕ Add Work";
+        } else {
+          users.push({ id: nextId++, date, time, work });
+        }
+        renderUsers();
+        document.getElementById("date").value = "";
+        document.getElementById("time").value = "";
+        document.getElementById("work").value = "";
+      } else { alert("Please fill all fields!"); }
+    }
+
+    function editUser(id) {
+      const user = users.find(u => u.id === id);
+      if (user) {
+        document.getElementById("date").value = user.date;
+     //   console.log(user.work);
+        document.getElementById("time").value = user.time;
+        document.getElementById("work").value = user.work;
+        editId = id;
+        document.querySelector(".form-container button").innerText = "💾 Save Changes";
+        
+      }
+    }
+
+
+    function removeUser(id) {
+      const card = document.getElementById(`user-${id}`);
+      if (card) {
+        card.classList.add("removing");
+        setTimeout(() => {
+          users = users.filter(user => user.id !== id);
+          renderUsers();
+        }, 400);
+      }
+    }
+
+    function removeAllUsers() {
+      const cards = document.querySelectorAll(".card");
+      cards.forEach((card, index) => {
+        setTimeout(() => { card.classList.add("removing"); }, index * 150);
+      });
+      setTimeout(() => { users = []; renderUsers(); }, cards.length * 150 + 400);
+    }
+
+    function restoreAllUsers() {
+      users = [...initialUsers];
+      const container = document.getElementById("user-container");
+      container.innerHTML = "";
+      users.forEach((user, index) => {
+        setTimeout(() => { container.innerHTML += createUserCard(user, index); }, index * 200);
+      });
+      saveUsers();
+    }
+
+    function searchUsers() {
+      const query = document.getElementById("search").value.toLowerCase();
+      const filtered = users.filter(u =>
+        u.date.toLowerCase().includes(query) ||
+        u.time.toLowerCase().includes(query) ||
+        u.work.toLowerCase().includes(query)
+      );
+      renderUsers(filtered);
+    }
+
+    function sortUsers() {
+      const option = document.getElementById("sort").value;
+      if (option === "date-asc") {
+        users.sort((a, b) => new Date(a.date) - new Date(b.date));
+      } else if (option === "date-desc") {
+        users.sort((a, b) => new Date(b.date) - new Date(a.date));
+      } else if (option === "time-asc") {
+        users.sort((a, b) => a.time.localeCompare(b.time));
+      } else if (option === "time-desc") {
+        users.sort((a, b) => b.time.localeCompare(a.time));
+      }
+      renderUsers();
+    }
+
+    function filterToday() {
+      const today = new Date().toISOString().split("T")[0];
+      
+      const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    
+      const [year, month, day]= today.split("-");
+      const date=`${day} ${monthNames[Number(month-1)]} ${year}`;
+      // const date=`${day} ${month} ${year}`;
+      console.log(date);
+      
+      const todayTasks = users.filter(u => u.date === date);
+      renderUsers(todayTasks);
+  
+    }
+
+    renderUsers();
+    
+  </script>
+</body>
+</html>;
+  </script>
+</body>
+</html>
