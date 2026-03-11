@@ -26,7 +26,7 @@
       margin-bottom: 15px;
       border-radius: 16px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-      width: 340px;
+      width: 92%;
       transition: transform 0.2s ease;
     }
     .form-container:hover, .search-container:hover, .sort-container:hover, .filter-container:hover {
@@ -49,6 +49,10 @@
       border: 1px solid #ddd;
       border-radius: 10px;
       font-size: 14px;
+    }
+    .search-container input
+    {
+      width: 95%;
     }
     .form-container input:focus,
     .search-container input:focus,
@@ -220,8 +224,6 @@
       `;
     }
     
-    
-
     function renderUsers(filtered = null) {
       const container = document.getElementById("user-container");
       const list = filtered || users;
@@ -273,8 +275,10 @@
         document.getElementById("work").value = user.work;
         editId = id;
         document.querySelector(".form-container button").innerText = "💾 Save Changes";
+        
       }
     }
+
 
     function removeUser(id) {
       const card = document.getElementById(`user-${id}`);
@@ -347,5 +351,4 @@
     renderUsers();
   </script>
 </body>
-</html>></html>y>
-</html>></html>
+</html>
